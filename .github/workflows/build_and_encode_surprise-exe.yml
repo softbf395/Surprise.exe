@@ -1,0 +1,47 @@
+name: Build and Encode Surprise EXE
+
+on:
+  workflow_dispatch:  # Allows manual triggering of the workflow
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@v1
+
+      - name: Build the EXE
+        run: |
+          cmake -B build .
+          cmake --build build
+
+      - name: Encode the EXE
+        run: |
+          python encoder.py build/app_exe encoded.exe
+          python add_hint.py encoded.exe  # Add hint after encoding
+
+      - name: Upload Encoded EXE
+        uses: actions/upload-artifact@v3
+        with:
+          name: encoded-exe
+          path: build/encoded.exe
+
+      - name: Upload Python Decoder
+        uses: actions/upload-artifact@v3
+        with:
+          name: decoder-script
+          path: decoder.py
+
+      - name: Upload Hint
+        uses: actions/upload-artifact@v3
+        with:
+          name: hint
+          path: hint.txt
