@@ -28,20 +28,19 @@ jobs:
           python encoder.py build/app_exe encoded.exe
           python add_hint.py encoded.exe  # Add hint after encoding
 
-      - name: Upload Encoded EXE
-        uses: actions/upload-artifact@v3
-        with:
-          name: encoded-exe
-          path: build/encoded.exe
+      - name: Copy Files to Builds Directory
+        run: |
+          mkdir -p builds  # Create the builds directory if it doesn't exist
+          cp build/encoded.exe builds/encoded.exe
+          cp decoder.py builds/decoder.py
+          cp hint.txt builds/hint.txt
 
-      - name: Upload Python Decoder
-        uses: actions/upload-artifact@v3
-        with:
-          name: decoder-script
-          path: decoder.py
-
-      - name: Upload Hint
-        uses: actions/upload-artifact@v3
-        with:
-          name: hint
-          path: hint.txt
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.name "GitHub Action"
+          git config --local user.email "action@github.com"
+          git add builds/
+          git commit -m "Add built files"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
