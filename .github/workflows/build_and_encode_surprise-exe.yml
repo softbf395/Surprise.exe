@@ -37,8 +37,8 @@ jobs:
 
       - name: Commit and Push Changes
         run: |
-          git config --local user.name "GitHub Action"
-          git config --local user.email "action@github.com"
+          git config --local user.name "Actions (softbf395)"
+          git config --local user.email "softbf395@gmail.com"
           git add builds/
           git commit -m "Add built files"
           git push
