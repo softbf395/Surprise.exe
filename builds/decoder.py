@@ -1,17 +1,36 @@
-import os
+import sys
 
-def decode_zero_width(encoded_file, output_file):
-    with open(encoded_file, "r", encoding="utf-8") as f:
-        encoded_string = f.read()
+def decode(encoded_file, output_file):
+    # Read the encoded file
+    with open(encoded_file, 'r', encoding='utf-8') as file:
+        encoded_content = file.read().replace('\n', '')  # Read and remove any newlines
 
-    # Remove hint if present
-    encoded_string = encoded_string.split("\nHint:")[0]
-    
-    binary_string = encoded_string.replace('\u200C', '0').replace('\u200D', '1')
-    byte_array = bytearray(int(binary_string[i:i+8], 2) for i in range(0, len(binary_string), 8))
+    # Create a binary representation from zero-width characters
+    binary_data = ""
+    for char in encoded_content:
+        if char == '‍':  # Zero Width Joiner (U+200D) represents '1'
+            binary_data += '1'
+        elif char == '‌':  # Zero Width Non-Joiner (U+200C) represents '0'
+            binary_data += '0'
 
-    with open(output_file, "wb") as f:
-        f.write(byte_array)
+    # Convert binary string to bytes
+    byte_array = bytearray()
+    for i in range(0, len(binary_data), 8):
+        byte = binary_data[i:i+8]
+        if len(byte) < 8:  # Pad with zeros if less than 8 bits
+            byte = byte.ljust(8, '0')
+        byte_array.append(int(byte, 2))
+
+    # Write the bytes to the output file
+    with open(output_file, 'wb') as file:
+        file.write(byte_array)
 
 if __name__ == "__main__":
-    decode_zero_width("encoded.exe", "app.exe")
+    if len(sys.argv) != 3:
+        print("Usage: python decoder.py <encoded_file> <output_file>")
+        sys.exit(1)
+
+    encoded_file = sys.argv[1]
+    output_file = sys.argv[2]
+    decode(encoded_file, output_file)
+    print(f"Decoded file saved as: {output_file}")
